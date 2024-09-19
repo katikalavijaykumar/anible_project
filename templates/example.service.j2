@@ -1,1 +1,11 @@
+[Unit]
+Description=Example Flask Application
+
+[Service]
+Environment="INSTANCE_PATH=/opt/example/instance"
+ExecStart=/opt/example/run.sh
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
 
