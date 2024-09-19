@@ -1,1 +1,83 @@
+- name: Install Standard CA Certificates
+  hosts: all
+  become: yes
+
+  tasks:
+    - name: Install CA certificates package
+      apt:
+        name: ca-certificates
+        state: present
+- name: Install Custom CA Certificates
+  hosts: all
+  become: yes
+
+  tasks:
+    - name: Copy custom CA certificates to the target host
+      copy:
+        src: "{{ item }}"
+        dest: /usr/local/share/ca-certificates/
+        owner: root
+        group: root
+        mode: '0644'
+      with_items:
+        - files/CA1.crt
+        - files/CA2.crt
+        - files/CA3.crt
+
+    - name: Update CA certificates
+      command: update-ca-certificates
+- name: Deploy Python Flask Application
+  hosts: all
+  become: yes
+
+  tasks:
+    - name: Create the deployment directory
+      file:
+        path: /opt/example
+        state: directory
+        owner: root
+        group: root
+        mode: '0755'
+
+    - name: Create the virtual environment
+      command: python3 -m venv /opt/example/venv
+
+    - name: Install the application wheel file
+      pip:
+        requirements: files/Example-1.1.2-py3-none-any.whl
+        virtualenv: /opt/example/venv
+    - name: Deploy run.sh script
+      template:
+        src: templates/run.sh.j2
+        dest: /opt/example/run.sh
+        mode: '0755'
+    - name: Create the instance folder
+      file:
+        path: /opt/example/instance
+        state: directory
+        owner: root
+        group: root
+        mode: '0755'
+
+    - name: Deploy config.py to the instance folder
+      template:
+        src: templates/config.py.j2
+        dest: /opt/example/instance/config.py
+        mode: '0644'
+    - name: Deploy systemd service
+      template:
+        src: templates/example.service.j2
+        dest: /etc/systemd/system/example.service
+        mode: '0644'
+
+    - name: Reload systemd
+      command: systemctl daemon-reload
+
+    - name: Enable and start the Flask application service
+      systemd:
+        name: example
+        enabled: yes
+        state: started
+
+
 
