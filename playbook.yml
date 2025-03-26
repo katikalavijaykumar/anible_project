@@ -1,4 +1,4 @@
-- name: Install Standard CA
+- name: Install Standard CA Certificates
   hosts: all
   become: yes
 
@@ -78,7 +78,3 @@
         name: example
         enabled: yes
         state: started
-
-
-
-Hi Vijay, How Are You ?
