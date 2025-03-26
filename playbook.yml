@@ -1,4 +1,4 @@
-- name: Install Standard CA Certificates
+- name: Install Standard CA
   hosts: all
   become: yes
 
